@@ -1,0 +1,130 @@
+<html>
+<head>
+<title>energy_distribution_visualization.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #080808;}
+.s1 { color: #8c8c8c; font-style: italic;}
+.s2 { color: #0033b3;}
+.s3 { color: #067d17;}
+.s4 { color: #1750eb;}
+.ls0 { height: 1px; border-width: 0; color: #dfe1e5; background-color:#dfe1e5}
+</style>
+</head>
+<body bgcolor="#ffffff">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#c0c0c0" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+energy_distribution_visualization.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% md 
+# __DATA VISUALIZATION ON ELECTRIC POWER SOURCES (1995-2024)__ <hr class="ls0">#%% md 
+### This dataset presents annual installed power generation capacity by energy sources from 1995 to 2024, covering conventional, renewable, and waste-based sources for trend and comparison analysis. <hr class="ls0">#%% md 
+## **READING AND PREPARING THE DATA** <hr class="ls0">#%% 
+</span><span class="s1">## Importing essential libraries in order to clean the data and visualize it</span>
+<span class="s2">import </span><span class="s0">pandas </span><span class="s2">as </span><span class="s0">pd</span>
+<span class="s2">import </span><span class="s0">matplotlib.pyplot </span><span class="s2">as </span><span class="s0">plt</span>
+<span class="s2">import </span><span class="s0">seaborn </span><span class="s2">as </span><span class="s0">sns</span>
+
+<span class="s1">## Loading the data</span>
+<span class="s0">df = pd.read_csv(</span><span class="s3">'electric_stations_power.csv'</span><span class="s0">)</span>
+<span class="s0">df</span><hr class="ls0"><span class="s0">#%% md 
+## **CHECKING THE DATA** <hr class="ls0">#%% 
+df.shape               </span><span class="s1"># Checking the size of dataset</span>
+<span class="s0">df.info                </span><span class="s1"># Checking the column info and non-null counts</span>
+<span class="s0">df.isna().sum()        </span><span class="s1"># Counting the NaN values in each column</span><hr class="ls0"><span class="s0">#%% md 
+## **DATA CLEANING PROCESS** <hr class="ls0">#%% md 
+### Missing or placeholder values ('-') are replaced with zeros, an unnecessary 'Unnamed: 1' column is removed, and column names are shortened for clearer and more efficient data handling and analysis. <hr class="ls0">#%% 
+</span><span class="s1">## Cleaning the data</span>
+<span class="s1"># Replacing the missing values with 0</span>
+<span class="s0">df.replace(</span><span class="s3">'-'</span><span class="s0">, </span><span class="s4">0</span><span class="s0">, inplace=</span><span class="s2">True</span><span class="s0">)</span>
+
+<span class="s1"># Deleting the second unnamed column</span>
+<span class="s0">df.drop(columns=</span><span class="s3">'Unnamed: 1'</span><span class="s0">, axis=</span><span class="s4">1</span><span class="s0">, inplace=</span><span class="s2">True</span><span class="s0">)</span>
+
+<span class="s1"># Renaming the columns by shortening for using more efficiently</span>
+<span class="s0">df.rename(columns={</span><span class="s3">'End-year power capacity (MW)'</span><span class="s0">: </span><span class="s3">'Total_capacity'</span><span class="s0">,</span>
+                   <span class="s3">'Fuel &amp; thermal power plants (MW)'</span><span class="s0">: </span><span class="s3">'Fuel-Thermal'</span><span class="s0">,</span><span class="s3">'Hydropower plants (MW)'</span><span class="s0">: </span><span class="s3">'Hydro'</span><span class="s0">,</span>
+                   <span class="s3">'Wind power plants (MW)'</span><span class="s0">: </span><span class="s3">'Wind'</span><span class="s0">,</span>
+                   <span class="s3">'Solar power plants (MW)'</span><span class="s0">: </span><span class="s3">'Solar'</span><span class="s0">,</span>
+                   <span class="s3">'Municipal solid waste power plant (MW)'</span><span class="s0">: </span><span class="s3">'MSW'</span><span class="s0">,</span>
+                   <span class="s3">'Biogas power plants (MW)'</span><span class="s0">: </span><span class="s3">'Biogas'</span>
+                   <span class="s0">}, inplace=</span><span class="s2">True</span><span class="s0">)</span>
+<hr class="ls0"><span class="s0">#%% 
+df</span><hr class="ls0"><span class="s0">#%% md 
+### Converting the Year and Energy Capacity columns (Wind, Solar, Hydro, Fuel-Thermal) to numeric data types to ensure correct plotting and numerical analysis. <hr class="ls0">#%% 
+df[</span><span class="s3">'Year'</span><span class="s0">] = pd.to_numeric(df[</span><span class="s3">'Year'</span><span class="s0">])</span>
+<span class="s0">df[</span><span class="s3">'Wind'</span><span class="s0">] = pd.to_numeric(df[</span><span class="s3">'Wind'</span><span class="s0">])</span>
+<span class="s0">df[</span><span class="s3">'Solar'</span><span class="s0">] = pd.to_numeric(df[</span><span class="s3">'Solar'</span><span class="s0">])</span>
+<span class="s0">df[</span><span class="s3">'Hydro'</span><span class="s0">] = pd.to_numeric(df[</span><span class="s3">'Hydro'</span><span class="s0">])</span>
+<span class="s0">df[</span><span class="s3">'Fuel-Thermal'</span><span class="s0">] = pd.to_numeric(df[</span><span class="s3">'Fuel-Thermal'</span><span class="s0">])</span><hr class="ls0"><span class="s0">#%% md 
+## **VISUALIZATION PART** <hr class="ls0">#%% md 
+### The first line plot shows the change in total installed power generation capacity (MW) over time, illustrating the overall growth of the energy sector across the analyzed years. <hr class="ls0">#%% md 
+### In terms of the description of the first graph, there is a steady rise of total energy capacity from 1995 to 2024, showing how the system has grown from roughly 5,000 MW to nearly 8,000 MW. The timeline captures a clear period of acceleration after 2012, driven largely by the rapid integration of solar and wind power into the grid. While traditional sources like biogas and municipal waste provided a consistent foundation for decades, the recent surge in renewables is what ultimately pushed the total capacity to the record highs we see in the last few years. <hr class="ls0">#%% 
+</span><span class="s1">## Total_capacity VS Year</span>
+
+<span class="s0">plt.figure(figsize= (</span><span class="s4">10</span><span class="s0">, </span><span class="s4">5</span><span class="s0">))</span>
+<span class="s0">plt.plot(df[</span><span class="s3">'Year'</span><span class="s0">], df[</span><span class="s3">'Total_capacity'</span><span class="s0">], color=</span><span class="s3">'red'</span><span class="s0">)</span>
+<span class="s0">plt.title(</span><span class="s3">'Energy Distribution'</span><span class="s0">)</span>
+<span class="s0">plt.xlabel(</span><span class="s3">'Year'</span><span class="s0">)</span>
+<span class="s0">plt.ylabel(</span><span class="s3">'Total Capacity (MW)'</span><span class="s0">)</span>
+<span class="s0">plt.grid(</span><span class="s2">True</span><span class="s0">, linestyle=</span><span class="s3">'--'</span><span class="s0">)</span>
+<span class="s0">plt.show()</span>
+
+<span class="s1"># Fluctuated trend over time</span><hr class="ls0"><span class="s0">#%% md 
+### This plot shows how fuel-thermal, hydro, wind, and solar power capacities have changed over time, highlighting the growth of renewable energy alongside conventional sources. 
+ 
+ <hr class="ls0">#%% 
+</span><span class="s1">## Multiple line visualization</span>
+<span class="s1"># Fuel-Thermal, Hydro, Wind, Solar VS Year</span>
+
+<span class="s0">plt.plot(df[</span><span class="s3">'Year'</span><span class="s0">], df[</span><span class="s3">'Fuel-Thermal'</span><span class="s0">], </span><span class="s3">'b--'</span><span class="s0">, label=</span><span class="s3">'Fuel Thermal'</span><span class="s0">)</span>
+<span class="s0">plt.plot(df[</span><span class="s3">'Year'</span><span class="s0">], df[</span><span class="s3">'Hydro'</span><span class="s0">], </span><span class="s3">'g-'</span><span class="s0">, label=</span><span class="s3">'Hydro'</span><span class="s0">)</span>
+<span class="s0">plt.plot(df[</span><span class="s3">'Year'</span><span class="s0">], df[</span><span class="s3">'Wind'</span><span class="s0">], </span><span class="s3">'r--'</span><span class="s0">, label=</span><span class="s3">'Wind'</span><span class="s0">)</span>
+<span class="s0">plt.plot(df[</span><span class="s3">'Year'</span><span class="s0">], df[</span><span class="s3">'Solar'</span><span class="s0">], </span><span class="s3">'y--'</span><span class="s0">, label=</span><span class="s3">'Solar'</span><span class="s0">)</span>
+<span class="s0">plt.xlabel(</span><span class="s3">'Year'</span><span class="s0">)</span>
+<span class="s0">plt.ylabel(</span><span class="s3">'Power Sources (MW)'</span><span class="s0">)</span>
+<span class="s0">plt.title(</span><span class="s3">'Major Power Sources Over Time'</span><span class="s0">)</span>
+<span class="s0">plt.grid(</span><span class="s2">True</span><span class="s0">, linestyle=</span><span class="s3">'--'</span><span class="s0">)</span>
+<span class="s0">plt.legend()</span>
+<span class="s0">plt.show()</span><hr class="ls0"><span class="s0">#%% md 
+### On the other hand, this horizontal grouped bar chart generated by applying seaborn compares wind, solar, municipal solid waste, and biogas power capacities from 2013 to 2024, clearly highlighting the growth of renewable sources while keeping smaller contributors visible across years. 
+ 
+### What charms the most is the dramatic &quot;blue surge&quot; of solar power; after years of being a minor player, it exploded in 2023 to become the dominant source in this category. This sudden leap creates a striking visual story of an energy grid hitting a tipping point and modernizing almost overnight. <hr class="ls0">#%% 
+</span><span class="s1">## Bar Chart visualization on wind, solar, municipal solid waste and biogas power plants by using SeaBorn</span>
+<span class="s2">import </span><span class="s0">seaborn </span><span class="s2">as </span><span class="s0">sns</span>
+
+<span class="s1"># Filter dataset for years 2013-2024</span>
+<span class="s0">df_filtered = df[(df[</span><span class="s3">'Year'</span><span class="s0">] &gt;= </span><span class="s4">2013</span><span class="s0">) &amp; (df[</span><span class="s3">'Year'</span><span class="s0">] &lt;= </span><span class="s4">2024</span><span class="s0">)]</span>
+<span class="s1"># Sort by Year descending to show 2024 at the top</span>
+<span class="s0">df_filtered = df_filtered.sort_values(</span><span class="s3">'Year'</span><span class="s0">, ascending=</span><span class="s2">False</span><span class="s0">)</span>
+
+<span class="s1"># Melt the data to long format for Seaborn</span>
+<span class="s0">df_plotting = df_filtered.melt(</span>
+    <span class="s0">id_vars=</span><span class="s3">'Year'</span><span class="s0">,</span>
+    <span class="s0">value_vars=[</span><span class="s3">'Wind'</span><span class="s0">, </span><span class="s3">'Solar'</span><span class="s0">, </span><span class="s3">'MSW'</span><span class="s0">, </span><span class="s3">'Biogas'</span><span class="s0">],</span>
+    <span class="s0">var_name=</span><span class="s3">'Energy Source'</span><span class="s0">,</span>
+    <span class="s0">value_name=</span><span class="s3">'Capacity'</span>
+<span class="s0">)</span>
+
+<span class="s0">plt.figure(figsize=(</span><span class="s4">10</span><span class="s0">, </span><span class="s4">8</span><span class="s0">))</span>
+
+<span class="s1"># Create horizontal grouped bar chart</span>
+<span class="s0">sns.barplot(</span>
+    <span class="s0">data=df_plotting,</span>
+    <span class="s0">x=</span><span class="s3">'Capacity'</span><span class="s0">,                     </span><span class="s1"># Numeric axis</span>
+    <span class="s0">y=df_plotting[</span><span class="s3">'Year'</span><span class="s0">].astype(str),</span><span class="s1"># Categorical axis for grouping</span>
+    <span class="s0">hue=</span><span class="s3">'Energy Source'</span><span class="s0">,</span>
+    <span class="s0">dodge=</span><span class="s2">True</span><span class="s0">,                       </span><span class="s1"># Separate bars for each source</span>
+    <span class="s0">orient=</span><span class="s3">'h'</span><span class="s0">,                       </span><span class="s1"># Horizontal bar</span>
+    <span class="s0">palette=[</span><span class="s3">'red'</span><span class="s0">, </span><span class="s3">'blue'</span><span class="s0">, </span><span class="s3">'green'</span><span class="s0">, </span><span class="s3">'orange'</span><span class="s0">]</span>
+<span class="s0">)</span>
+
+<span class="s0">plt.title(</span><span class="s3">'Specialized Energy Sources by Year (2013-2024)'</span><span class="s0">, fontsize=</span><span class="s4">16</span><span class="s0">)</span>
+<span class="s0">plt.grid(axis=</span><span class="s3">'x'</span><span class="s0">, linestyle=</span><span class="s3">'--'</span><span class="s0">, alpha=</span><span class="s4">0.6</span><span class="s0">)</span>
+<span class="s0">plt.legend(title=</span><span class="s3">'Source'</span><span class="s0">, bbox_to_anchor=(</span><span class="s4">1.02</span><span class="s0">, </span><span class="s4">1</span><span class="s0">), loc=</span><span class="s3">'upper left'</span><span class="s0">)                                  </span><span class="s1"># Legend with a specific position</span>
+<span class="s0">plt.tight_layout()</span>
+<span class="s0">plt.show()</span>
+</pre>
+</body>
+</html>
